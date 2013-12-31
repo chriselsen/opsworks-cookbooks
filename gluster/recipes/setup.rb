@@ -7,7 +7,7 @@ directory node[:glusterfs][:server][:export_directory] do
   recursive true
 end
 
-service "glusterd" do
+service "glusterfs-server" do
   supports :status => true, :restart => true, :reload => true
   action :start
 end
