@@ -55,6 +55,8 @@ if gluster_instances.count > 0 then
 	Chef::Log.debug("gluster server: #{gluster_server.map{|i| i[0] }.join(', ')}")
 
     node[:wordpress][:bind_mounts][:mounts].each do |dir, source|
+		Chef::Log.debug("gluster dir: #{dir}")
+		Chef::Log.debug("source dir: #{source}")
         directory source do
             recursive true
             action :create
