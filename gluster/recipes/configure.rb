@@ -10,8 +10,8 @@ Chef::Log.debug("instances: #{instances.map{|i| i[0] }.join(', ')}")
 Chef::Log.debug("is_first_node: #{is_first_node}")
 Chef::Log.debug("hostname: #{hostname}")
 
-if instances.count > 1 then
-    Chef::Log.info("Glusterfs: More than one node: Probing peers")
+if is_first_node && instances.count > 1 then
+	Chef::Log.info("Glusterfs: More than one node and first one: Creating volume")
 
     instances.each do |i|
         instance = i[1]
@@ -26,12 +26,6 @@ if instances.count > 1 then
         end
 
     end
-
-end
-
-
-if is_first_node && instances.count > 1 then
-	Chef::Log.info("Glusterfs: More than one node and first one: Creating volume")
    
     node[:glusterfs][:server][:volumes].each do |volume_name|
     #node[:deploy].each do |application, deploy|
