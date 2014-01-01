@@ -46,10 +46,13 @@ if is_first_node && instances.count > 1 then
     #end
 end
 
-gluster_instances = node[:opsworks][:layers].fetch("gluster")[:instances]
+gluster_instances = node[:opsworks][:layers].fetch(layer)[:instances]
+Chef::Log.debug("gluster instances: #{gluster_instances.map{|i| i[0] }.join(', ')}")
+
 puts gluster_instances.inspect
 if gluster_instances.count > 0 then
-    server = gluster_instances.sort_by{|k,v| v[:booted_at] }[0][1][:private_ip]
+    gluster_server = gluster_instances.sort_by{|k,v| v[:booted_at] }[0][1][:private_ip]
+	Chef::Log.debug("gluster server: #{gluster_server.map{|i| i[0] }.join(', ')}")
 
     node[:wordpress][:bind_mounts][:mounts].each do |dir, source|
         directory source do
@@ -60,7 +63,7 @@ if gluster_instances.count > 0 then
 
         # mount -t glusterfs -o log-level=WARNING,log-file=/var/log/gluster.log 10.200.1.11:/test /mnt
         mount "glusterfs mount point"  do
-            device "#{server}:/#{source}"
+            device "#{gluster_server}:/#{source}"
             fstype "glusterfs"
             options "log-level=WARNING,log-file=/var/log/gluster.log"
             action :enable
