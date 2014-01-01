@@ -10,8 +10,8 @@ Chef::Log.debug("instances: #{instances.map{|i| i[0] }.join(', ')}")
 Chef::Log.debug("is_first_node: #{is_first_node}")
 Chef::Log.debug("hostname: #{hostname}")
 
-if is_first_node && instances.count > 1 then
-    Chef::Log.info("First Node; Probing peers")
+if instances.count > 1 then
+    Chef::Log.info("Glusterfs: More than one node: Probing peers")
 
     instances.each do |i|
         instance = i[1]
@@ -27,6 +27,12 @@ if is_first_node && instances.count > 1 then
 
     end
 
+end
+
+
+if is_first_node && instances.count > 1 then
+	Chef::Log.info("Glusterfs: More than one node and first one: Creating volume")
+   
     node[:glusterfs][:server][:volumes].each do |volume_name|
     #node[:deploy].each do |application, deploy|
         Chef::Log.info("Gluster Volume: #{volume_name}")
@@ -46,17 +52,18 @@ if is_first_node && instances.count > 1 then
 end
 
 if instances.count > 1 then
+	Chef::Log.info("Glusterfs: More than one node: Mounting volume")
 	gluster_instances = node[:opsworks][:layers].fetch(layer)[:instances]
-	Chef::Log.debug("gluster instances: #{gluster_instances.map{|i| i[0] }.join(', ')}")
+	Chef::Log.debug("Glusterfs: Instances: #{gluster_instances.map{|i| i[0] }.join(', ')}")
 
 	puts gluster_instances.inspect
 	if gluster_instances.count > 0 then
 		gluster_server = gluster_instances.sort_by{|k,v| v[:booted_at] }[0][1][:private_ip].first
-		Chef::Log.debug("gluster server: #{gluster_server}")
+		Chef::Log.debug("Glusterfs: Server: #{gluster_server}")
 
 		node[:glusterfs][:bind_mounts][:mounts].each do |source, dir|
-			Chef::Log.debug("gluster dir: #{dir}")
-			Chef::Log.debug("source dir: #{source}")
+			Chef::Log.debug("Glusterfs: Directory: #{dir}")
+			Chef::Log.debug("Glsuterfs: Source: #{source}")
 			directory dir do
 				recursive true
 				action :create
@@ -68,23 +75,8 @@ if instances.count > 1 then
 				device "#{gluster_server}:/#{source}"
 				fstype "glusterfs"
 				options "log-level=WARNING,log-file=/var/log/gluster.log"
-				action :enable
+				action :mount
 			end
 		end
-	end
-
-	template '/etc/auto.gluster' do
-	  source 'automount.erb'
-	  mode 0444
-	  owner 'root'
-	  group 'root'
-	end
-
-	bash "Add auto.gluster to /etc/auto.master and restart autofs" do
-	  code <<-EOF
-		echo "/- /etc/auto.gluster" >> /etc/auto.master
-		service autofs restart
-	  EOF
-	  not_if { ::File.read('/etc/auto.master').include?('auto.gluster') }
-	end
+	end	
 end
