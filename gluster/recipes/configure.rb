@@ -51,8 +51,8 @@ if instances.count > 1 then
 
 	puts gluster_instances.inspect
 	if gluster_instances.count > 0 then
-		gluster_server = gluster_instances.sort_by{|k,v| v[:booted_at] }[0][1][:private_ip]
-		Chef::Log.debug("gluster server: #{gluster_server.map{|i| i[0] }.join(', ')}")
+		gluster_server = gluster_instances.sort_by{|k,v| v[:booted_at] }[0][1][:private_ip].first
+		Chef::Log.debug("gluster server: #{gluster_server}")
 
 		node[:glusterfs][:bind_mounts][:mounts].each do |source, dir|
 			Chef::Log.debug("gluster dir: #{dir}")
