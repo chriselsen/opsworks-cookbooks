@@ -1,0 +1,4 @@
+# Automount configuration for opsworks standard mounts
+<% node[:glusterfs][:bind_mounts][:mounts].each do |source, dir| %>
+<%= source %> -fstype=none,bind,rw :<%= dir %>
+<% end %>
