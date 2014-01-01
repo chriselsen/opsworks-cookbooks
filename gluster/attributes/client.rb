@@ -1,3 +1,3 @@
 default[:wordpress][:bind_mounts][:mounts] = {
-  "/srv/www" => "www"
+  "/srv/www/glusterfs" => "www"
 }
