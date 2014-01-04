@@ -1,0 +1,1 @@
+default[:aws-ubuntu][:swapsize] = "1024"
