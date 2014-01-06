@@ -3,7 +3,7 @@
 # e.g. AWS t1.micro - to prevent "out of memory" issues.
 #
 swap_size = node[:awsubuntu][:swapsize]
-Chef::Log.debg("Creating SWAP with size #{swap_size} bytes")
+Chef::Log.debug("Creating SWAP with size #{swap_size} bytes")
 
 script "memory_swap" do
   interpreter "bash"
