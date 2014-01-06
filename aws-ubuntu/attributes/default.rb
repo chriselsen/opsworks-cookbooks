@@ -1,1 +1,1 @@
-default[:aws-ubuntu][:swapsize] = "1024"
+default[:awsubuntu][:swapsize] = "1024"
