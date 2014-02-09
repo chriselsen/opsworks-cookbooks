@@ -1,3 +1,8 @@
+# AWS OpsWorks Recipe for Wordpress to be executed during the Configure lifecycle phase
+# - Creates the config file wp-config.php with MySQL data.
+# - Creates a Cronjob.
+# - Imports a database backup if it exists.
+
 require 'uri'
 require 'net/http'
 require 'net/https'
@@ -10,6 +15,8 @@ request = Net::HTTP::Get.new(uri.request_uri)
 response = http.request(request)
 keys = response.body
 
+
+# Create the Wordpress config file wp-config.php with corresponding values
 node[:deploy].each do |app_name, deploy|
 
     template "#{deploy[:deploy_to]}/current/wp-config.php" do
@@ -32,8 +39,11 @@ node[:deploy].each do |app_name, deploy|
         )
     end
 
+
+	# Import Wordpress database backup from file if it exists
 	mysql_command = "/usr/bin/mysql -h #{deploy[:database][:host]} -u #{deploy[:database][:username]} #{node[:mysql][:server_root_password].blank? ? '' : "-p#{node[:mysql][:server_root_password]}"} #{deploy[:database][:database]}"
 
+	Chef::Log.debug("Importing Wordpress database backup...")
 	script "memory_swap" do
 		interpreter "bash"
 		user "root"
@@ -41,12 +51,14 @@ node[:deploy].each do |app_name, deploy|
 		code <<-EOH
 			if ls #{deploy[:deploy_to]}/current/*.sql &> /dev/null; then 
 				#{mysql_command} < #{deploy[:deploy_to]}/current/*.sql;
+				rm #{deploy[:deploy_to]}/current/*.sql;
 			fi;
 		EOH
 	end
 	
 end
 
+# Create a Cronjob for Wordpress
 cron "wordpress" do
   hour "*"
   minute "*/15"
